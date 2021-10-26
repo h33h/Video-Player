@@ -11,7 +11,7 @@ import AVFoundation
 class VideoPlayerVC: UIViewController {
 
     private var videoIsPlaying = false
-    private var buttonsIsShown = false
+    private var buttonsIsShown = (false, Date.now)
     private var player: AVPlayer? {
         didSet {
             playerLayer = AVPlayerLayer(player: player)
@@ -45,7 +45,7 @@ class VideoPlayerVC: UIViewController {
         super.viewDidLoad()
     }
     private func showButtons() {
-        let numberOftouches = tapGesture.numberOfTouches
+        let lastShow = buttonsIsShown.1
         playButton.isHidden = false
         forwardButton.isHidden = false
         backwardButton.isHidden = false
@@ -54,17 +54,19 @@ class VideoPlayerVC: UIViewController {
         fullScreenButton.isHidden = false
         slider.isHidden = false
         dividerLabel.isHidden = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            if self.buttonsIsShown, numberOftouches == self.tapGesture.numberOfTouches {
-            self.playButton.isHidden = true
-            self.forwardButton.isHidden = true
-            self.backwardButton.isHidden = true
-            self.durationLabel.isHidden = true
-            self.currentTimeLabel.isHidden = true
-            self.fullScreenButton.isHidden = true
-            self.slider.isHidden = true
-            self.dividerLabel.isHidden = true
-                self.buttonsIsShown.toggle()
+        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) {[weak self] _ in
+            guard let buttonsIsShown = self?.buttonsIsShown else { return }
+            if buttonsIsShown.0, lastShow == buttonsIsShown.1 {
+            self?.playButton.isHidden = true
+            self?.forwardButton.isHidden = true
+            self?.backwardButton.isHidden = true
+            self?.durationLabel.isHidden = true
+            self?.currentTimeLabel.isHidden = true
+            self?.fullScreenButton.isHidden = true
+            self?.slider.isHidden = true
+            self?.dividerLabel.isHidden = true
+                self?.buttonsIsShown.0.toggle()
+                self?.buttonsIsShown.1 = Date.now
             }
         }
     }
@@ -155,9 +157,10 @@ class VideoPlayerVC: UIViewController {
         player?.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
     }
     @IBAction private func tapGesture(_ sender: Any) {
-        if !buttonsIsShown {
+        if !buttonsIsShown.0 {
+            buttonsIsShown.0.toggle()
+            buttonsIsShown.1 = Date.now
             showButtons()
-            buttonsIsShown.toggle()
         } else {
             playButton.isHidden = true
             forwardButton.isHidden = true
@@ -167,7 +170,8 @@ class VideoPlayerVC: UIViewController {
             fullScreenButton.isHidden = true
             slider.isHidden = true
             dividerLabel.isHidden = true
-            buttonsIsShown.toggle()
+            buttonsIsShown.0.toggle()
+            buttonsIsShown.1 = Date.now
         }
     }
 }
