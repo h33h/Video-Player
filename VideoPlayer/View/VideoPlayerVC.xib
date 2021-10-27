@@ -17,10 +17,11 @@
                 <outlet property="durationLabel" destination="BiT-yA-2l4" id="DMl-DI-e5L"/>
                 <outlet property="forwardButton" destination="LsK-bw-gAe" id="iXr-bq-ECg"/>
                 <outlet property="fullScreenButton" destination="gS2-H3-5KW" id="MPe-e5-8Xv"/>
+                <outlet property="muteButton" destination="LDR-KP-Wou" id="7mv-eU-aqe"/>
                 <outlet property="playButton" destination="PUk-7P-gAf" id="SJQ-0V-4pV"/>
                 <outlet property="slider" destination="eQ8-UH-VGr" id="fBW-qx-rmp"/>
                 <outlet property="tapGesture" destination="HSK-tA-xQH" id="u1v-1j-w4D"/>
-                <outlet property="videoView" destination="tee-nt-0vr" id="TbP-bI-X64"/>
+                <outlet property="videoView" destination="Iq9-gp-adM" id="mU4-h5-2Zw"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -32,6 +33,19 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tee-nt-0vr">
                     <rect key="frame" x="0.0" y="0.0" width="474" height="237"/>
                     <subviews>
+                        <view contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="Iq9-gp-adM">
+                            <rect key="frame" x="0.0" y="0.0" width="474" height="237"/>
+                            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
+                        <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LDR-KP-Wou">
+                            <rect key="frame" x="16" y="16" width="27.5" height="22"/>
+                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                            <state key="normal" image="speaker.wave.3.fill" catalog="system"/>
+                            <connections>
+                                <action selector="muteAction:" destination="-1" eventType="touchUpInside" id="O9d-0O-OO2"/>
+                            </connections>
+                        </button>
                         <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUk-7P-gAf">
                             <rect key="frame" x="228.5" y="107.5" width="17" height="22"/>
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -107,10 +121,11 @@
                             </subviews>
                         </stackView>
                     </subviews>
-                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <gestureRecognizers/>
                     <constraints>
                         <constraint firstItem="PUk-7P-gAf" firstAttribute="centerY" secondItem="GVL-Tb-9mq" secondAttribute="centerY" id="0bf-NW-r18"/>
+                        <constraint firstItem="Iq9-gp-adM" firstAttribute="top" secondItem="tee-nt-0vr" secondAttribute="top" id="86t-YJ-Nzc"/>
                         <constraint firstAttribute="bottom" secondItem="eQ8-UH-VGr" secondAttribute="bottom" constant="16" id="9WR-3c-haP"/>
                         <constraint firstItem="eQ8-UH-VGr" firstAttribute="top" secondItem="Z2U-f0-Mg2" secondAttribute="bottom" constant="8" id="DEH-TA-5db"/>
                         <constraint firstItem="Z2U-f0-Mg2" firstAttribute="leading" secondItem="tee-nt-0vr" secondAttribute="leading" constant="16" id="Jzq-ve-HAt"/>
@@ -119,8 +134,13 @@
                         <constraint firstItem="PUk-7P-gAf" firstAttribute="centerX" secondItem="tee-nt-0vr" secondAttribute="centerX" id="Pqb-Et-NmE"/>
                         <constraint firstAttribute="trailing" secondItem="eQ8-UH-VGr" secondAttribute="trailing" constant="16" id="PwR-yJ-Tfg"/>
                         <constraint firstItem="LsK-bw-gAe" firstAttribute="centerY" secondItem="PUk-7P-gAf" secondAttribute="centerY" id="Tdt-7r-LWh"/>
+                        <constraint firstAttribute="bottom" secondItem="Iq9-gp-adM" secondAttribute="bottom" id="VG8-fD-3JW"/>
+                        <constraint firstAttribute="trailing" secondItem="Iq9-gp-adM" secondAttribute="trailing" id="bzo-aw-Pvw"/>
+                        <constraint firstItem="LDR-KP-Wou" firstAttribute="leading" secondItem="tee-nt-0vr" secondAttribute="leading" constant="16" id="ea1-5g-Vlb"/>
+                        <constraint firstItem="Iq9-gp-adM" firstAttribute="leading" secondItem="tee-nt-0vr" secondAttribute="leading" id="fCZ-vO-TRI"/>
                         <constraint firstItem="eQ8-UH-VGr" firstAttribute="top" secondItem="gS2-H3-5KW" secondAttribute="bottom" constant="8" id="gX7-dB-oYK"/>
                         <constraint firstAttribute="trailing" secondItem="LsK-bw-gAe" secondAttribute="trailing" constant="80" id="kl3-8n-Iuz"/>
+                        <constraint firstItem="LDR-KP-Wou" firstAttribute="top" secondItem="tee-nt-0vr" secondAttribute="top" constant="16" id="p5Y-pM-Fgs"/>
                         <constraint firstItem="PUk-7P-gAf" firstAttribute="centerY" secondItem="tee-nt-0vr" secondAttribute="centerY" id="qKM-vS-X6D"/>
                         <constraint firstAttribute="trailing" secondItem="gS2-H3-5KW" secondAttribute="trailing" constant="16" id="r4y-dM-7qJ"/>
                     </constraints>
@@ -140,7 +160,7 @@
             <nil key="simulatedTopBarMetrics"/>
             <nil key="simulatedBottomBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <point key="canvasLocation" x="334.78260869565219" y="2764.6205357142858"/>
+            <point key="canvasLocation" x="334.15178571428572" y="2764.4927536231885"/>
         </view>
         <tapGestureRecognizer id="HSK-tA-xQH">
             <connections>
@@ -152,6 +172,7 @@
         <image name="backward.end.fill" catalog="system" width="128" height="102"/>
         <image name="forward.end.fill" catalog="system" width="128" height="102"/>
         <image name="pause.fill" catalog="system" width="116" height="128"/>
+        <image name="speaker.wave.3.fill" catalog="system" width="128" height="86"/>
         <image name="square.dashed" catalog="system" width="128" height="114"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

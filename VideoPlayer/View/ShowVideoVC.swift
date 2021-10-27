@@ -12,6 +12,7 @@ import AVKit
 class ShowVideoVC: UIViewController {
 
     private var video: Video? {
+        // When video is setted then setup Player and Labels
         didSet {
             if let video = video {
                 configure(video: video)
@@ -26,11 +27,39 @@ class ShowVideoVC: UIViewController {
     @IBOutlet var containerView: UIView!
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.hidesBackButton = true
-        let title = UILabel()
-        title.text = "VideoTube"
-        title.font = UIFont.systemFont(ofSize: 20, weight: .heavy)
-        title.textColor = .white
+        setupNavigationBar()
+        containerView.addSubview(children[0].view)
+    }
+    private func configure(video: Video) {
+        if let title = video.title { setTitleLabel(title: title) }
+        if let subtitle = video.subtitle { setSubitleLabel(subtitle: subtitle) }
+        if let description = video.description { setDescription(description: description) }
+        guard let stringUrl = video.sources?[0], let videoUrl = URL(string: stringUrl) else { return }
+        setupPlayerVC(url: videoUrl)
+    }
+    override func viewDidLayoutSubviews() {
+        // VideoPlayerVC set frame to containerView bounds
+        children[0].view.frame = containerView.bounds
+    }
+    override func willTransition(to newCollection: UITraitCollection,
+                                 with coordinator: UIViewControllerTransitionCoordinator) {
+        switch UIDevice.current.orientation {
+        case .portrait, .portraitUpsideDown:
+            navigationItem.titleView?.isHidden = false
+            navigationItem.setLeftBarButton(backButton, animated: true)
+        default:
+            navigationItem.titleView?.isHidden = true
+            navigationItem.setLeftBarButton(nil, animated: true)
+        }
+    }
+}
+
+extension ShowVideoVC {
+    private func setupNavigationBar() {
+        setupLabel()
+        setupBackButton()
+    }
+    private func setupBackButton() {
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.backward"),
                                          style: .plain,
                                          target: self,
@@ -38,10 +67,23 @@ class ShowVideoVC: UIViewController {
         backButton.tintColor = .white
         backButton.image?.applyingSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 24))
         self.backButton = backButton
-        navigationItem.titleView = title
         navigationItem.leftBarButtonItem = backButton
-        containerView.addSubview(children[0].view)
+        }
+    private func setupLabel() {
+        navigationItem.hidesBackButton = true
+        let title = UILabel()
+        title.text = "VideoTube"
+        title.font = UIFont.systemFont(ofSize: 20, weight: .heavy)
+        title.textColor = .white
+        navigationItem.titleView = title
     }
+    @objc
+    func backButtonAction(sender: UIBarButtonItem) {
+        navigationController?.popViewController(animated: true)
+    }
+}
+
+extension ShowVideoVC {
     func setVideo(video: Video) {
         self.video = video
     }
@@ -60,34 +102,15 @@ class ShowVideoVC: UIViewController {
             self.descriptionTextView.text = description
         }
     }
-    private func configure(video: Video) {
-        if let title = video.title { setTitleLabel(title: title) }
-        if let subtitle = video.subtitle { setSubitleLabel(subtitle: subtitle) }
-        if let description = video.description { setDescription(description: description) }
-        guard let stringUrl = video.sources?[0], let videoUrl = URL(string: stringUrl) else { return }
-        let player = AVPlayer(url: videoUrl)
+}
+
+extension ShowVideoVC {
+    private func setupPlayerVC(url: URL) {
+        let player = AVPlayer(url: url)
         let childVC = VideoPlayerVC()
+        childVC.setPresenter(presenter: VideoPlayerPresenter(player: player, delegate: childVC))
         addChild(childVC)
         childVC.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         childVC.didMove(toParent: self)
-        childVC.setPlayer(player: player)
-        player.play()
-    }
-    @objc
-    func backButtonAction(sender: UIBarButtonItem) {
-        navigationController?.popViewController(animated: true)
-    }
-    override func viewDidLayoutSubviews() {
-        children[0].view.frame = containerView.bounds
-    }
-    override func willTransition(to newCollection: UITraitCollection,
-                                 with coordinator: UIViewControllerTransitionCoordinator) {
-        if UIDevice.current.orientation.isLandscape {
-            navigationItem.titleView?.isHidden = true
-            navigationItem.setLeftBarButton(nil, animated: true)
-        } else if UIDevice.current.orientation.isPortrait {
-            navigationItem.titleView?.isHidden = false
-            navigationItem.setLeftBarButton(backButton, animated: true)
-        }
     }
 }
