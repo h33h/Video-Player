@@ -31,9 +31,13 @@ class ShowVideoVC: UIViewController {
         containerView.addSubview(children[0].view)
     }
     private func configure(video: Video) {
-        if let title = video.title { setTitleLabel(title: title) }
-        if let subtitle = video.subtitle { setSubitleLabel(subtitle: subtitle) }
-        if let description = video.description { setDescription(description: description) }
+        if let title = video.title ,
+           let subtitle = video.subtitle,
+           let description = video.description {
+            configureViews(title: title,
+                           subtitle: subtitle,
+                           description: description)
+        }
         guard let stringUrl = video.sources?[0], let videoUrl = URL(string: stringUrl) else { return }
         setupPlayerVC(url: videoUrl)
     }
@@ -87,18 +91,10 @@ extension ShowVideoVC {
     func setVideo(video: Video) {
         self.video = video
     }
-    private func setTitleLabel(title: String) {
+    private func configureViews(title: String, subtitle: String, description: String) {
         DispatchQueue.main.async { [weak self] in
             self?.titleLabel.text = title
-        }
-    }
-    private func setSubitleLabel(subtitle: String) {
-        DispatchQueue.main.async { [weak self] in
             self?.subtitleLabel.text = subtitle
-        }
-    }
-    private func setDescription(description: String) {
-        DispatchQueue.main.async { [weak self] in
             self?.descriptionTextView.text = description
         }
     }
