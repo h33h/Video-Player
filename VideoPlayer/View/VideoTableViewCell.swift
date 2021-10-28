@@ -13,18 +13,18 @@ class VideoTableViewCell: UITableViewCell {
     @IBOutlet private var titleLabel: UILabel!
     @IBOutlet private var subtitleLabel: UILabel!
     private func setTitleLabel(title: String) {
-        DispatchQueue.main.async {
-            self.titleLabel.text = title
+        DispatchQueue.main.async { [weak self] in
+            self?.titleLabel.text = title
         }
     }
     private func setSubitleLabel(subtitle: String) {
-        DispatchQueue.main.async {
-            self.subtitleLabel.text = subtitle
+        DispatchQueue.main.async { [weak self] in
+            self?.subtitleLabel.text = subtitle
         }
     }
     private func setThumbnail(thumb: UIImage) {
-        DispatchQueue.main.async {
-            self.thumbImageView.image = thumb
+        DispatchQueue.main.async { [weak self] in
+            self?.thumbImageView.image = thumb
         }
     }
     func configure(video: Video) {

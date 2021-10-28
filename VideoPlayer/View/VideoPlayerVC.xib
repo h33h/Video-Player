@@ -83,6 +83,9 @@
                             <rect key="frame" x="14" y="191" width="446" height="31"/>
                             <connections>
                                 <action selector="sliderAction:" destination="-1" eventType="valueChanged" id="LJg-rv-MiO"/>
+                                <action selector="sliderBeginEditing:" destination="-1" eventType="editingDidBegin" id="L5E-gn-VAN"/>
+                                <action selector="touchDownSlider:" destination="-1" eventType="touchDown" id="Aji-4G-YYY"/>
+                                <action selector="touchUpInsideSlider:" destination="-1" eventType="touchUpInside" id="qEK-XL-44d"/>
                             </connections>
                         </slider>
                         <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gS2-H3-5KW">

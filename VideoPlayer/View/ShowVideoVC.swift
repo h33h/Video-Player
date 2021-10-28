@@ -88,18 +88,18 @@ extension ShowVideoVC {
         self.video = video
     }
     private func setTitleLabel(title: String) {
-        DispatchQueue.main.async {
-            self.titleLabel.text = title
+        DispatchQueue.main.async { [weak self] in
+            self?.titleLabel.text = title
         }
     }
     private func setSubitleLabel(subtitle: String) {
-        DispatchQueue.main.async {
-            self.subtitleLabel.text = subtitle
+        DispatchQueue.main.async { [weak self] in
+            self?.subtitleLabel.text = subtitle
         }
     }
     private func setDescription(description: String) {
-        DispatchQueue.main.async {
-            self.descriptionTextView.text = description
+        DispatchQueue.main.async { [weak self] in
+            self?.descriptionTextView.text = description
         }
     }
 }

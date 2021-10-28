@@ -18,9 +18,8 @@ class VideoPlayerVC: UIViewController {
     private var playerLayer: AVPlayerLayer? {
         didSet {
             guard let playerLayer = playerLayer else { return }
-            DispatchQueue.main.async {
-                playerLayer.frame = self.videoView.bounds
-                self.videoView.layer.addSublayer(playerLayer)
+            DispatchQueue.main.async { [weak self] in
+                self?.videoView.layer.addSublayer(playerLayer)
             }
         }
     }
@@ -38,6 +37,31 @@ class VideoPlayerVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        presenter?.playerPlay()
+    }
+    override func viewDidLayoutSubviews() {
+        videoView.frame = view.bounds
+        playerLayer?.frame = videoView.bounds
+    }
+    func setPresenter(presenter: VideoPlayerPresenter) {
+        self.presenter = presenter
+    }
+}
+
+extension VideoPlayerVC {
+    private func getTimeString(time: CMTime) -> String {
+        let totalSeconds = CMTimeGetSeconds(time)
+        let hours = Int(totalSeconds/3600)
+        let minutes = Int(totalSeconds/60)%60
+        let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
+        if hours > 0 {
+            return String(format: "%i:%02i:%02i", arguments: [hours, minutes, seconds])
+        } else {
+            return String(format: "%02i:%02i", arguments: [minutes, seconds])
+        }
+    }
     private func setControllsHidden(value: Bool) {
         playButton.isHidden = value
         forwardButton.isHidden = value
@@ -49,8 +73,10 @@ class VideoPlayerVC: UIViewController {
         dividerLabel.isHidden = value
         muteButton.isHidden = value
     }
-    func setPresenter(presenter: VideoPlayerPresenter) {
-        self.presenter = presenter
+    private func setOrientation(orientation: UIInterfaceOrientation) {
+        UIView.setAnimationsEnabled(false)
+        UIDevice.current.setValue(orientation.rawValue, forKey: "orientation")
+        UIView.setAnimationsEnabled(true)
     }
     private func timerReload() {
         timer?.invalidate()
@@ -62,13 +88,25 @@ class VideoPlayerVC: UIViewController {
         setControllsHidden(value: false)
         timerReload()
     }
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        presenter?.playerPlay()
+}
+
+extension VideoPlayerVC: VideoPlayerPresenterDelegate {
+    func durationOfVideo(duration: CMTime) {
+        self.durationLabel.text = getTimeString(time: duration)
+        self.slider.minimumValue = 0
+        self.slider.setValue(0, animated: true)
+        self.slider.maximumValue = Float(duration.seconds)
     }
-    override func viewDidLayoutSubviews() {
-        playerLayer?.frame = videoView.bounds
+    func currentTimeOfVideo(currentTime: CMTime) {
+        self.currentTimeLabel.text = getTimeString(time: currentTime)
+        self.slider.setValue(Float(currentTime.seconds), animated: true)
     }
+    func playerLayer(layer: AVPlayerLayer) {
+        self.playerLayer = layer
+    }
+}
+
+extension VideoPlayerVC {
     @IBAction private func backwardAction(_ sender: Any) {
         presenter?.backRewind(seconds: 15)
         timerReload()
@@ -80,13 +118,13 @@ class VideoPlayerVC: UIViewController {
     @IBAction private func fullScreenAction(_ sender: Any) {
         switch UIDevice.current.orientation {
         case .portrait, .portraitUpsideDown:
-            UIView.setAnimationsEnabled(false)
-            UIDevice.current.setValue(UIInterfaceOrientation.landscapeLeft.rawValue, forKey: "orientation")
-            UIView.setAnimationsEnabled(true)
-        default:
-            UIView.setAnimationsEnabled(false)
-            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            UIView.setAnimationsEnabled(true)
+            setOrientation(orientation: .landscapeLeft)
+        case .landscapeLeft, .landscapeRight:
+            setOrientation(orientation: .portrait)
+        case .faceDown, .faceUp, .unknown:
+            setOrientation(orientation: .landscapeLeft)
+        @unknown default:
+            setOrientation(orientation: .landscapeLeft)
         }
         timerReload()
     }
@@ -103,6 +141,11 @@ class VideoPlayerVC: UIViewController {
     }
     @IBAction private func sliderAction(_ sender: UISlider) {
         presenter?.setPlayerTime(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
+    }
+    @IBAction func touchDownSlider(_ sender: Any) {
+        timer?.invalidate()
+    }
+    @IBAction func touchUpInsideSlider(_ sender: Any) {
         timerReload()
     }
     @IBAction private func muteAction(_ sender: Any) {
@@ -124,33 +167,5 @@ class VideoPlayerVC: UIViewController {
             setControllsHidden(value: true)
         }
         buttonsIsShown.toggle()
-    }
-}
-
-extension VideoPlayerVC: VideoPlayerPresenterDelegate {
-    func durationOfVideo(duration: CMTime) {
-        self.durationLabel.text = getTimeString(time: duration)
-        self.slider.minimumValue = 0
-        self.slider.maximumValue = Float(duration.seconds)
-    }
-    func currentTimeOfVideo(currentTime: CMTime) {
-        self.currentTimeLabel.text = getTimeString(time: currentTime)
-    }
-    func playerLayer(layer: AVPlayerLayer) {
-        self.playerLayer = layer
-    }
-}
-
-extension VideoPlayerVC {
-    private func getTimeString(time: CMTime) -> String {
-        let totalSeconds = CMTimeGetSeconds(time)
-        let hours = Int(totalSeconds/3600)
-        let minutes = Int(totalSeconds/60)%60
-        let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
-        if hours > 0 {
-            return String(format: "%i:%02i:%02i", arguments: [hours, minutes, seconds])
-        } else {
-            return String(format: "%02i:%02i", arguments: [minutes, seconds])
-        }
     }
 }

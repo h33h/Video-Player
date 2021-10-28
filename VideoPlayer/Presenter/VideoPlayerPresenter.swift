@@ -16,10 +16,50 @@ protocol VideoPlayerPresenterDelegate: AnyObject {
 
 class VideoPlayerPresenter {
     private var player: AVPlayer
+    private weak var delegate: VideoPlayerPresenterDelegate?
+    private var durationObserver: NSKeyValueObservation?
+    private var currentTimeObserver: Any?
+    init(player: AVPlayer, delegate: VideoPlayerPresenterDelegate) {
+        self.delegate = delegate
+        self.player = player
+        // Add Observers for video duration and current time
+        addTimeObservers()
+        // When player is setted then setup PlayerLayer
+        setupPlayerLayer(player: player)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(playerDidFinishPlaying),
+                                               name: .AVPlayerItemDidPlayToEndTime,
+                                               object: nil)
+    }
+    deinit {
+        durationObserver?.invalidate()
+        if let currentTimeObserver = currentTimeObserver {
+            player.removeTimeObserver(currentTimeObserver)
+        }
+    }
     private func setupPlayerLayer(player: AVPlayer) {
         let playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resize
         delegate?.playerLayer(layer: playerLayer)
+    }
+    private func addTimeObservers() {
+        durationObserver = player.currentItem?.observe(\.duration,
+                                                        options: [.initial, .new],
+                                                        changeHandler: { [weak self] _, _ in
+            guard let self = self else { return }
+            if let duration = self.player.currentItem?.duration, duration.seconds > 0.0 {
+                self.delegate?.durationOfVideo(duration: duration)
+            }
+        })
+        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        currentTimeObserver = player.addPeriodicTimeObserver(forInterval: interval,
+                                            queue: DispatchQueue.main,
+                                            using: { [weak self] _ in
+            guard let self = self,
+                  let currentTime = self.player.currentItem?.currentTime()
+            else { return }
+            self.delegate?.currentTimeOfVideo(currentTime: currentTime)
+        })
     }
     func setPlayerTime(to time: CMTime) {
         player.seek(to: time)
@@ -46,45 +86,16 @@ class VideoPlayerPresenter {
         guard let duration = player.currentItem?.duration else { return }
         let currentTime = CMTimeGetSeconds(player.currentTime())
         let newTime = currentTime + seconds
-        if newTime < (CMTimeGetSeconds(duration) - seconds) {
+        if (CMTimeGetSeconds(duration) - newTime) > 0 {
             let time = CMTimeMake(value: Int64(newTime * 1000), timescale: 1000)
             player.seek(to: time)
+        } else {
+            player.seek(to: CMTime(seconds: 0, preferredTimescale: 1000))
         }
     }
-    private func addTimeObservers() {
-        durationObserver = player.currentItem?.observe(\.duration,
-                                                        options: [.initial, .new],
-                                                        changeHandler: { [weak self] _, _ in
-            guard let self = self else { return }
-            if let duration = self.player.currentItem?.duration, duration.seconds > 0.0 {
-                self.delegate?.durationOfVideo(duration: duration)
-            }
-        })
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        currentTimeObserver = player.addPeriodicTimeObserver(forInterval: interval,
-                                            queue: DispatchQueue.main,
-                                            using: { [weak self] _ in
-            guard let self = self,
-                  let currentTime = self.player.currentItem?.currentTime()
-            else { return }
-            self.delegate?.currentTimeOfVideo(currentTime: currentTime)
-        })
-    }
-    private weak var delegate: VideoPlayerPresenterDelegate?
-    private var durationObserver: NSKeyValueObservation?
-    private var currentTimeObserver: Any?
-    init(player: AVPlayer, delegate: VideoPlayerPresenterDelegate) {
-        self.delegate = delegate
-        self.player = player
-        // Add Observers for video duration and current time
-        addTimeObservers()
-        // When player is setted then setup PlayerLayer
-        setupPlayerLayer(player: player)
-    }
-    deinit {
-        durationObserver?.invalidate()
-        if let currentTimeObserver = currentTimeObserver {
-            player.removeTimeObserver(currentTimeObserver)
-        }
+    @objc
+    func playerDidFinishPlaying(sender: Any) {
+        player.seek(to: CMTime(seconds: 0, preferredTimescale: 1000))
+        playerPlay()
     }
 }
